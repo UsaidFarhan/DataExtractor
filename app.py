@@ -1,4 +1,12 @@
+import subprocess
+import sys
 import os
+
+# Auto-install dependencies from requirements.txt
+req_file = os.path.join(os.path.dirname(__file__), "requirements.txt")
+if os.path.exists(req_file):
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", req_file, "-q"])
+
 import re
 import io
 import pdfplumber
