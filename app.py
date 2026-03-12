@@ -2,7 +2,6 @@ import subprocess
 import sys
 import os
 
-# Auto-install dependencies from requirements.txt
 req_file = os.path.join(os.path.dirname(__file__), "requirements.txt")
 if os.path.exists(req_file):
     subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", req_file, "-q"])
@@ -20,13 +19,6 @@ PATTERNS = {
         r"Employee\s*Code[:\s]+(\d+)",
         r"Emp\.?\s*No\.?[:\s]+(\d+)",
         r"Ref:\s*\(per\)\s*/\s*file\s+(\d+)",
-    ],
-    "Old Gross Salary": [
-        r"(?:from\s+Rs\.?\s*[₨]?\s*)([\d,\.]+)",
-        r"(?:current\s*(?:gross\s*)?salary\s*(?:is|of|:)\s*Rs\.?\s*[₨]?\s*)([\d,\.]+)",
-        r"(?:existing\s*(?:gross\s*)?salary\s*(?:is|of|:)\s*Rs\.?\s*[₨]?\s*)([\d,\.]+)",
-        r"(?:previous\s*(?:gross\s*)?salary\s*(?:is|of|:)\s*Rs\.?\s*[₨]?\s*)([\d,\.]+)",
-        r"(?:present\s*(?:gross\s*)?salary\s*(?:is|of|:)\s*Rs\.?\s*[₨]?\s*)([\d,\.]+)",
     ],
     "New Gross Salary": [
         r"(?:gross\s*salary\s*from\s*Rs\.?\s*[₨]?\s*[\d,\.]+\s*[\/\-]*\s*to\s*Rs\.?\s*[₨]?\s*)([\d,\.]+)",
@@ -87,8 +79,7 @@ def build_excel(data_rows):
     ws = wb.active
     ws.title = "Salary Data"
 
-    headers = ["Source", "Employee Code", "Old Gross Salary",
-               "New Gross Salary", "Difference", "Date Effective From"]
+    headers = ["Source", "Employee Code", "New Gross Salary", "Difference", "Date Effective From"]
 
     header_fill = PatternFill("solid", start_color="2F5496", end_color="2F5496")
     header_font = Font(bold=True, color="FFFFFF", name="Arial")
@@ -143,7 +134,6 @@ if uploaded_files:
                     row = [
                         label,
                         fields["Employee Code"],
-                        fields["Old Gross Salary"],
                         fields["New Gross Salary"],
                         fields["Difference"],
                         fields["Date Effective From"],
