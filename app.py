@@ -20,8 +20,17 @@ PATTERNS = {
         r"Emp\.?\s*No\.?[:\s]+(\d+)",
         r"Ref:\s*\(per\)\s*/\s*file\s+(\d+)",
     ],
+    "Designation": [
+        r"Designation[:\s]+(.+)",
+    ],
+    "Grade": [
+        r"Grade[:\s]+(GRD\.[A-Z0-9\.]+)",
+        r"Grade[:\s]+([A-Z0-9\-\.]+)",
+    ],
     "New Gross Salary": [
         r"(?:gross\s*salary\s*from\s*Rs\.?\s*[₨]?\s*[\d,\.]+\s*[\/\-]*\s*to\s*Rs\.?\s*[₨]?\s*)([\d,\.]+)",
+        r"(?:raising\s*your\s*gross\s*salary\s*to\s*Rs\.?)\s*[₨]?\s*([\d,\.]+)",
+        r"(?:gross\s*salary\s*to\s*Rs\.?)\s*[₨]?\s*([\d,\.]+)",
         r"(?:gross\s*salary\s*in\s*your\s*new\s*grade\s*will\s*be\s*Rs\.?)\s*[₨]?\s*([\d,\.]+)",
         r"(?:revised\s*gross\s*salary\s*will\s*be\s*Rs\.?)\s*[₨]?\s*([\d,\.]+)",
         r"(?:monthly\s*gross\s*salary\s*will\s*be\s*Rs\.?)\s*[₨]?\s*([\d,\.]+)",
@@ -79,7 +88,8 @@ def build_excel(data_rows):
     ws = wb.active
     ws.title = "Salary Data"
 
-    headers = ["Source", "Employee Code", "New Gross Salary", "Difference", "Date Effective From"]
+    headers = ["Source", "Employee Code", "Designation", "Grade",
+               "New Gross Salary", "Difference", "Date Effective From"]
 
     header_fill = PatternFill("solid", start_color="2F5496", end_color="2F5496")
     header_font = Font(bold=True, color="FFFFFF", name="Arial")
@@ -134,6 +144,8 @@ if uploaded_files:
                     row = [
                         label,
                         fields["Employee Code"],
+                        fields["Designation"],
+                        fields["Grade"],
                         fields["New Gross Salary"],
                         fields["Difference"],
                         fields["Date Effective From"],
