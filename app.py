@@ -35,12 +35,12 @@ PATTERNS = {
     ],
 
     "Old Salary": [
-        r"remuneration\s*is\s*being\s*revised\s*from\s*(?:Rs\.?|PKR\.?|₨)\s*([\d,\.]+)\s*to",
-        r"(?:gross\s*)?salary\s*(?:is\s*being\s*)?revised\s*from\s*(?:Rs\.?|PKR\.?|₨)\s*([\d,\.]+)\s*to",
-        r"revised\s*from\s*(?:Rs\.?|PKR\.?|₨)\s*([\d,\.]+)\s*to",
-        r"from\s*(?:Rs\.?|PKR\.?|₨)\s*([\d,\.]+)\s*(?:to|per\s*month)",
-        r"raising\s*your\s*gross\s*salary\s*from\s*(?:Rs\.?|PKR\.?|₨)\s*([\d,\.]+)",
-        r"gross\s*salary\s*from\s*(?:Rs\.?|PKR\.?|₨)\s*([\d,\.]+)\s*to",
+        r"remuneration\s*is\s*being\s*revised\s*from\s*(?:(?:PKR\.?\s*)?(?:Rs\.?|₨)\s*|PKR\.?\s*)([\d,\.]+)\s*to",
+        r"(?:gross\s*)?salary\s*(?:is\s*being\s*)?revised\s*from\s*(?:(?:PKR\.?\s*)?(?:Rs\.?|₨)\s*|PKR\.?\s*)([\d,\.]+)\s*to",
+        r"revised\s*from\s*(?:(?:PKR\.?\s*)?(?:Rs\.?|₨)\s*|PKR\.?\s*)([\d,\.]+)\s*to",
+        r"from\s*(?:(?:PKR\.?\s*)?(?:Rs\.?|₨)\s*|PKR\.?\s*)([\d,\.]+)\s*(?:to|per\s*month)",
+        r"raising\s*your\s*gross\s*salary\s*from\s*(?:(?:PKR\.?\s*)?(?:Rs\.?|₨)\s*|PKR\.?\s*)([\d,\.]+)",
+        r"gross\s*salary\s*from\s*(?:(?:PKR\.?\s*)?(?:Rs\.?|₨)\s*|PKR\.?\s*)([\d,\.]+)\s*to",
     ],
 
     "New Gross Salary": [
