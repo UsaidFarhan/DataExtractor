@@ -46,6 +46,8 @@ PATTERNS = {
     "New Gross Salary": [
         r"(?:remuneration\s*is\s*being\s*revised\s*from\s*[₨Rs\.PKR\s]+[\d,\.]+\s*to\s*PKR\.?\s*)([\d,\.]+)",
         r"(?:revised\s*from\s*[₨Rs\.PKR\s]+[\d,\.]+\s*to\s*PKR\.?\s*)([\d,\.]+)",
+        r"(?:remuneration\s*is\s*being\s*revised\s*from\s*[₨Rs\.PKR\s]+[\d,\.]+\s*to\s*Rs\.?\s*)([\d,\.]+)",
+        r"(?:revised\s*from\s*[₨Rs\.PKR\s]+[\d,\.]+\s*to\s*Rs\.?\s*)([\d,\.]+)",
         r"(?:to\s*PKR\.?\s*)([\d,\.]+)",
         r"(?:gross\s*salary\s*from\s*Rs\.?\s*[₨]?\s*[\d,\.]+\s*[\/\-]*\s*to\s*Rs\.?\s*[₨]?\s*)([\d,\.]+)",
         r"(?:raising\s*your\s*gross\s*salary\s*to\s*Rs\.?)\s*[₨]?\s*([\d,\.]+)",
@@ -58,6 +60,7 @@ PATTERNS = {
         r"(?:salary\s*will\s*be\s*Rs\.?)\s*[₨]?\s*([\d,\.]+)",
         r"(?:will\s*be\s*Rs\.?)\s*[₨]?\s*([\d,\.]+)",
         r"(?:to\s*Rs\.?\s*[₨]?\s*)([\d,\.]+)\s*[\/\-]*\s*per\s*month",
+        r"(?:to\s*Rs\.?\s*)([\d,\.]+)(?:\s*[\/\-]|\s*,|\s+with)",
     ],
 
     "Difference": [
