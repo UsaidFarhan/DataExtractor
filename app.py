@@ -23,6 +23,7 @@ PATTERNS = {
         r"Employee\s*Code[:\s]+(\d+)",
         r"Emp\.?\s*No\.?[:\s]+(\d+)",
         r"Ref:\s*\(per\)\s*/\s*file\s+(\d+)",
+        r"EMP\s*#\s*(\d+)",
     ],
 
     "Designation": [
@@ -38,9 +39,9 @@ PATTERNS = {
         r"remuneration\s*is\s*being\s*revised\s*from\s*(?:(?:PKR\.?\s*)?(?:Rs\.?|₨)\s*|PKR\.?\s*)([\d,\.]+)\s*to",
         r"(?:gross\s*)?salary\s*(?:is\s*being\s*)?revised\s*from\s*(?:(?:PKR\.?\s*)?(?:Rs\.?|₨)\s*|PKR\.?\s*)([\d,\.]+)\s*to",
         r"revised\s*from\s*(?:(?:PKR\.?\s*)?(?:Rs\.?|₨)\s*|PKR\.?\s*)([\d,\.]+)\s*to",
-        r"from\s*(?:(?:PKR\.?\s*)?(?:Rs\.?|₨)\s*|PKR\.?\s*)([\d,\.]+)\s*(?:to|per\s*month)",
         r"raising\s*your\s*gross\s*salary\s*from\s*(?:(?:PKR\.?\s*)?(?:Rs\.?|₨)\s*|PKR\.?\s*)([\d,\.]+)",
         r"gross\s*salary\s*from\s*(?:(?:PKR\.?\s*)?(?:Rs\.?|₨)\s*|PKR\.?\s*)([\d,\.]+)\s*to",
+        r"from\s*(?:(?:PKR\.?\s*)?(?:Rs\.?|₨)\s*|PKR\.?\s*)([\d,\.]+)\s*[\/\-]*\s*to",
     ],
 
     "New Gross Salary": [
@@ -49,7 +50,7 @@ PATTERNS = {
         r"(?:remuneration\s*is\s*being\s*revised\s*from\s*[₨Rs\.PKR\s]+[\d,\.]+\s*to\s*Rs\.?\s*)([\d,\.]+)",
         r"(?:revised\s*from\s*[₨Rs\.PKR\s]+[\d,\.]+\s*to\s*Rs\.?\s*)([\d,\.]+)",
         r"(?:to\s*PKR\.?\s*)([\d,\.]+)",
-        r"(?:gross\s*salary\s*from\s*Rs\.?\s*[₨]?\s*[\d,\.]+\s*[\/\-]*\s*to\s*Rs\.?\s*[₨]?\s*)([\d,\.]+)",
+        r"(?:gross\s*salary\s*from\s*(?:Rs\.?|₨|PKR\.?)\s*[\d,\.]+\s*[\/\-]*\s*to\s*Rs\.?\s*)([\d,\.]+)",
         r"(?:raising\s*your\s*gross\s*salary\s*to\s*Rs\.?)\s*[₨]?\s*([\d,\.]+)",
         r"(?:gross\s*salary\s*to\s*Rs\.?)\s*[₨]?\s*([\d,\.]+)",
         r"(?:gross\s*salary\s*in\s*your\s*new\s*grade\s*will\s*be\s*Rs\.?)\s*[₨]?\s*([\d,\.]+)",
@@ -78,6 +79,9 @@ PATTERNS = {
     ],
 
     "Bonus Amount": [
+        r"awarded\s*a\s*[Pp]erformance\s*[Rr]eward\s*of\s*(?:PKR|Rs\.?)\s*[₨]?\s*([\d,\.]+)\s*[\/\-]*",
+        r"[Pp]erformance\s*[Rr]eward\s*of\s*(?:PKR|Rs\.?)\s*[₨]?\s*([\d,\.]+)\s*[\/\-]*",
+        r"[Rr]eward\s*of\s*(?:PKR|Rs\.?)\s*[₨]?\s*([\d,\.]+)\s*[\/\-]*",
         r"awarded\s*a\s*[Pp]erformance\s*[Bb]onus\s*of\s*(?:PKR|Rs\.?)\s*[₨]?\s*([\d,\.]+)\s*[\/\-]*",
         r"[Pp]erformance\s*[Bb]onus\s*of\s*(?:PKR|Rs\.?)\s*[₨]?\s*([\d,\.]+)\s*[\/\-]*",
         r"[Bb]onus\s*of\s*(?:PKR|Rs\.?)\s*[₨]?\s*([\d,\.]+)\s*[\/\-]*",
@@ -89,6 +93,7 @@ PATTERNS = {
         r"effective\s*from\s+([A-Za-z]+\s+\d{1,2},\s*\d{4})",
         r"effective\s*from\s+(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})",
         r"with\s*effect\s*from\s+([A-Za-z]+\s+\d{1,2},?\s*\d{4})",
+        r"with\s*effect\s*from\s+(\d{1,2}\s+[A-Za-z]+\s+\d{4})",
         r"with\s*effect\s*from\s+(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})",
         r"w\.?e\.?f\.?\s*([A-Za-z]+\s+\d{1,2},\s*\d{4})",
         r"w\.?e\.?f\.?\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})",
@@ -112,6 +117,16 @@ def extract_fields(text):
                 matched = match.group(1).strip()
                 break
         results[field] = matched
+
+    # Calculate Difference from New - Old if not found in text
+    if not results.get("Difference"):
+        try:
+            new_sal = float(results["New Gross Salary"].replace(",", ""))
+            old_sal = float(results["Old Salary"].replace(",", ""))
+            results["Difference"] = f"{new_sal - old_sal:,.2f}"
+        except Exception:
+            pass
+
     return results
 
 
