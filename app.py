@@ -13,11 +13,7 @@ import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment
 import streamlit as st
 
-
-# ---------------- PATTERNS ---------------- #
-
 PATTERNS = {
-
     "Employee Code": [
         r"Employee\s*Number[:\s]+(\d+)",
         r"Employee\s*Code[:\s]+(\d+)",
@@ -25,31 +21,29 @@ PATTERNS = {
         r"Ref:\s*\(per\)\s*/\s*file\s+(\d+)",
         r"EMP\s*#\s*(\d+)",
     ],
-
     "Designation": [
         r"Designation[:\s]+(.+)",
     ],
-
     "Grade": [
         r"Grade[:\s]+(GRD\.[A-Z0-9\.]+)",
         r"Grade[:\s]+([A-Z0-9\-\.]+)",
     ],
-
-    "Old Salary": [
+    "Old Gross Salary": [
         r"remuneration\s*is\s*being\s*revised\s*from\s*(?:(?:PKR\.?\s*)?(?:Rs\.?|₨)\s*|PKR\.?\s*)([\d,\.]+)\s*to",
         r"(?:gross\s*)?salary\s*(?:is\s*being\s*)?revised\s*from\s*(?:(?:PKR\.?\s*)?(?:Rs\.?|₨)\s*|PKR\.?\s*)([\d,\.]+)\s*to",
         r"revised\s*from\s*(?:(?:PKR\.?\s*)?(?:Rs\.?|₨)\s*|PKR\.?\s*)([\d,\.]+)\s*to",
-        r"raising\s*your\s*gross\s*salary\s*from\s*(?:(?:PKR\.?\s*)?(?:Rs\.?|₨)\s*|PKR\.?\s*)([\d,\.]+)",
-        r"gross\s*salary\s*from\s*(?:(?:PKR\.?\s*)?(?:Rs\.?|₨)\s*|PKR\.?\s*)([\d,\.]+)\s*to",
-        r"from\s*(?:(?:PKR\.?\s*)?(?:Rs\.?|₨)\s*|PKR\.?\s*)([\d,\.]+)\s*[\/\-]*\s*to",
+        r"raising\s*your\s*[Gg]ross\s*[Ss]alary\s*from\s*(?:(?:PKR\.?\s*)?(?:Rs\.?|₨)\s*|PKR\.?\s*)([\d,\.]+)",
+        r"[Gg]ross\s*[Ss]alary\s*from\s*(?:(?:PKR\.?\s*)?(?:Rs\.?|₨)\s*|PKR\.?\s*)([\d,\.]+)\s*[\/\-]*\s*\(",
+        r"[Gg]ross\s*[Ss]alary\s*from\s*(?:(?:PKR\.?\s*)?(?:Rs\.?|₨)\s*|PKR\.?\s*)([\d,\.]+)\s*to",
+        r"from\s*(?:(?:PKR\.?\s*)?(?:Rs\.?|₨)\s*|PKR\.?\s*)([\d,\.]+)\s*[\/\-]*\s*\(",
     ],
-
     "New Gross Salary": [
         r"(?:remuneration\s*is\s*being\s*revised\s*from\s*[₨Rs\.PKR\s]+[\d,\.]+\s*to\s*PKR\.?\s*)([\d,\.]+)",
         r"(?:revised\s*from\s*[₨Rs\.PKR\s]+[\d,\.]+\s*to\s*PKR\.?\s*)([\d,\.]+)",
         r"(?:remuneration\s*is\s*being\s*revised\s*from\s*[₨Rs\.PKR\s]+[\d,\.]+\s*to\s*Rs\.?\s*)([\d,\.]+)",
         r"(?:revised\s*from\s*[₨Rs\.PKR\s]+[\d,\.]+\s*to\s*Rs\.?\s*)([\d,\.]+)",
         r"(?:to\s*PKR\.?\s*)([\d,\.]+)",
+        r"to\s*(?:Rs\.?|PKR\.?)\s*[₨]?\s*([\d,\.]+)\s*[\/\-]*\s*\([^)]*01\.\d{2}\.\d{4}",   # "to Rs. 76,175 /- (as on 01.04.2026)"
         r"(?:gross\s*salary\s*from\s*(?:Rs\.?|₨|PKR\.?)\s*[\d,\.]+\s*[\/\-]*\s*to\s*Rs\.?\s*)([\d,\.]+)",
         r"(?:raising\s*your\s*gross\s*salary\s*to\s*Rs\.?)\s*[₨]?\s*([\d,\.]+)",
         r"(?:gross\s*salary\s*to\s*Rs\.?)\s*[₨]?\s*([\d,\.]+)",
@@ -63,7 +57,16 @@ PATTERNS = {
         r"(?:to\s*Rs\.?\s*[₨]?\s*)([\d,\.]+)\s*[\/\-]*\s*per\s*month",
         r"(?:to\s*Rs\.?\s*)([\d,\.]+)(?:\s*[\/\-]|\s*,|\s+with)",
     ],
-
+    "1st Increment Amount": [
+        r"increase\s*of\s*(?:Rs\.?|PKR\.?)\s*[₨]?\s*([\d,\.]+)\s*[\/\-]*\s*with\s*effect\s*from",
+        r"increase\s*of\s*(?:Rs\.?|PKR\.?)\s*[₨]?\s*([\d,\.]+)\s*[\/\-]*\s*w\.?e\.?f",
+        r"(?:CBA|agreement|union)[^.]*?(?:Rs\.?|PKR\.?)\s*[₨]?\s*([\d,\.]+)",
+    ],
+    "2nd Increment Amount": [
+        r"increment\s*of\s*(?:Rs\.?|PKR\.?)\s*[₨]?\s*([\d,\.]+)\s*[\/\-]*\s*[Pp]er\s*month",
+        r"grant\s*an\s*increment\s*of\s*(?:Rs\.?|PKR\.?)\s*[₨]?\s*([\d,\.]+)",
+        r"management[^.]*?increment\s*of\s*(?:Rs\.?|PKR\.?)\s*[₨]?\s*([\d,\.]+)",
+    ],
     "Difference": [
         r"(?:gross\s*)?increase\s*of\s*(?:Rs\.?|PKR\.?)\s*[₨]?\s*(-?[\d,\.]+)\s*[\/\-]*",
         r"increment\s*of\s*(?:Rs\.?|PKR\.?)\s*[₨]?\s*(-?[\d,\.]+)\s*[\/\-]*",
@@ -72,40 +75,21 @@ PATTERNS = {
         r"revision\s*of\s*(?:Rs\.?|PKR\.?)\s*[₨]?\s*(-?[\d,\.]+)\s*[\/\-]*",
         r"increment\s*(?:amount\s*)?(?:is|:)\s*(?:Rs\.?|PKR\.?)\s*[₨]?\s*(-?[\d,\.]+)\s*[\/\-]*",
     ],
-
-    "Rating": [
-        r"rated\s+as\s+[\"'\u201c]?([^\"\u201d'\n,\.]+)",
-        r"performance\s*rating[:\s]+([A-Za-z\s]+)",
-    ],
-
-    "Bonus Amount": [
-        r"awarded\s*a\s*[Pp]erformance\s*[Rr]eward\s*of\s*(?:PKR|Rs\.?)\s*[₨]?\s*([\d,\.]+)\s*[\/\-]*",
-        r"[Pp]erformance\s*[Rr]eward\s*of\s*(?:PKR|Rs\.?)\s*[₨]?\s*([\d,\.]+)\s*[\/\-]*",
-        r"[Rr]eward\s*of\s*(?:PKR|Rs\.?)\s*[₨]?\s*([\d,\.]+)\s*[\/\-]*",
-        r"awarded\s*a\s*[Pp]erformance\s*[Bb]onus\s*of\s*(?:PKR|Rs\.?)\s*[₨]?\s*([\d,\.]+)\s*[\/\-]*",
-        r"[Pp]erformance\s*[Bb]onus\s*of\s*(?:PKR|Rs\.?)\s*[₨]?\s*([\d,\.]+)\s*[\/\-]*",
-        r"[Bb]onus\s*of\s*(?:PKR|Rs\.?)\s*[₨]?\s*([\d,\.]+)\s*[\/\-]*",
-        r"[Bb]onus\s*[Aa]mount[:\s]+(?:PKR|Rs\.?)\s*[₨]?\s*([\d,\.]+)\s*[\/\-]*",
-        r"[Bb]onus[:\s]+(?:PKR|Rs\.?)\s*[₨]?\s*([\d,\.]+)\s*[\/\-]*",
-    ],
-
     "Date Effective From": [
         r"effective\s*from\s+([A-Za-z]+\s+\d{1,2},\s*\d{4})",
         r"effective\s*from\s+(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})",
         r"with\s*effect\s*from\s+([A-Za-z]+\s+\d{1,2},?\s*\d{4})",
         r"with\s*effect\s*from\s+(\d{1,2}\s+[A-Za-z]+\s+\d{4})",
         r"with\s*effect\s*from\s+(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})",
+        r"effective\s*date[:\s]+([A-Za-z]+\s+\d{1,2},\s*\d{4})",
+        r"effective\s*date[:\s]+(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})",
         r"w\.?e\.?f\.?\s*([A-Za-z]+\s+\d{1,2},\s*\d{4})",
         r"w\.?e\.?f\.?\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})",
     ],
 }
 
-
-# ---------------- HELPERS ---------------- #
-
 def clean_number(value):
-    return value.replace(",", "") if value else value
-
+    return value.replace(",", "").rstrip(".") if value else value
 
 def extract_fields(text):
     results = {}
@@ -121,14 +105,13 @@ def extract_fields(text):
     # Calculate Difference from New - Old if not found in text
     if not results.get("Difference"):
         try:
-            new_sal = float(results["New Gross Salary"].replace(",", ""))
-            old_sal = float(results["Old Salary"].replace(",", ""))
+            new_sal = float(clean_number(results["New Gross Salary"]))
+            old_sal = float(clean_number(results["Old Gross Salary"]))
             results["Difference"] = f"{new_sal - old_sal:,.2f}"
         except Exception:
             pass
 
     return results
-
 
 def process_pdf(file_bytes, filename):
     results = []
@@ -141,7 +124,6 @@ def process_pdf(file_bytes, filename):
             results.append((label, fields))
     return results
 
-
 def build_excel(data_rows):
     wb = openpyxl.Workbook()
     ws = wb.active
@@ -149,13 +131,12 @@ def build_excel(data_rows):
 
     headers = [
         "Source", "Employee Code", "Designation", "Grade",
-        "Old Salary", "New Gross Salary", "Difference",
-        "Rating", "Bonus Amount", "Date Effective From"
+        "Old Gross Salary", "1st Increment Amount", "2nd Increment Amount",
+        "New Gross Salary", "Difference", "Date Effective From"
     ]
 
     header_fill = PatternFill("solid", start_color="2F5496", end_color="2F5496")
     header_font = Font(bold=True, color="FFFFFF", name="Arial")
-
     for col, header in enumerate(headers, start=1):
         cell = ws.cell(row=1, column=col, value=header)
         cell.fill = header_fill
@@ -163,7 +144,6 @@ def build_excel(data_rows):
         cell.alignment = Alignment(horizontal="center")
 
     row_font = Font(name="Arial", size=10)
-
     for row_idx, row in enumerate(data_rows, start=2):
         for col_idx, value in enumerate(row, start=1):
             cell = ws.cell(row=row_idx, column=col_idx, value=value)
@@ -180,13 +160,11 @@ def build_excel(data_rows):
     buffer.seek(0)
     return buffer
 
-
-# ---------------- STREAMLIT UI ---------------- #
-
-st.set_page_config(page_title="Salary Letter Extractor", page_icon="📄")
+# ── STREAMLIT UI ────────────────────────────────────────────────
+st.set_page_config(page_title="Salary Letter Extractor", page_icon="📄", layout="centered")
 
 st.title("📄 Salary Letter Extractor")
-st.markdown("Upload PDF files and extract structured salary data.")
+st.markdown("Upload one or more PDF files and click **Extract** to generate an Excel file.")
 
 uploaded_files = st.file_uploader(
     "Upload PDF file(s)",
@@ -195,13 +173,12 @@ uploaded_files = st.file_uploader(
 )
 
 if uploaded_files:
-    if st.button("Extract & Generate Excel"):
-
+    if st.button("Extract & Generate Excel", type="primary"):
         all_rows = []
         total_pages = 0
-        missing_fields = 0
+        not_found_count = 0
 
-        with st.spinner("Processing PDFs..."):
+        with st.spinner("Processing..."):
             for uploaded_file in uploaded_files:
                 file_bytes = uploaded_file.read()
                 page_results = process_pdf(file_bytes, uploaded_file.name)
@@ -213,25 +190,25 @@ if uploaded_files:
                         fields.get("Employee Code", ""),
                         fields.get("Designation", ""),
                         fields.get("Grade", ""),
-                        clean_number(fields.get("Old Salary", "")),
+                        clean_number(fields.get("Old Gross Salary", "")),
+                        clean_number(fields.get("1st Increment Amount", "")),
+                        clean_number(fields.get("2nd Increment Amount", "")),
                         clean_number(fields.get("New Gross Salary", "")),
                         clean_number(fields.get("Difference", "")),
-                        fields.get("Rating", ""),
-                        clean_number(fields.get("Bonus Amount", "")),
                         fields.get("Date Effective From", ""),
                     ]
                     all_rows.append(row)
-                    missing_fields += sum(1 for v in fields.values() if not v)
+                    not_found_count += sum(1 for v in fields.values() if not v)
 
         if not all_rows:
-            st.error("No data extracted.")
+            st.error("No data could be extracted from the uploaded files.")
         else:
             fully_extracted = sum(1 for row in all_rows if "" not in row)
 
             col1, col2, col3 = st.columns(3)
             col1.metric("Letters Processed", total_pages)
             col2.metric("Fully Extracted", fully_extracted)
-            col3.metric("Missing Fields", missing_fields)
+            col3.metric("Fields Not Found", not_found_count)
 
             excel_buffer = build_excel(all_rows)
             base_name = os.path.splitext(uploaded_files[0].name)[0]
